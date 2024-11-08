@@ -49,7 +49,7 @@ const ProductAlternativeFinder: React.FC = () => {
 
     try {
       const response = await fetch(
-        `https://my-flask-app-brown.vercel.app/recommend?material=${encodeURIComponent(query)}`,
+        `https://fastapi-ml-wmnt.onrender.com/recommend?material=${encodeURIComponent(query)}`,
         { mode: "cors" }
       );
 
