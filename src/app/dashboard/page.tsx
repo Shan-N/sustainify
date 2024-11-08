@@ -1,11 +1,11 @@
-"use client"
-import React, { useState } from 'react';
-import { Search, Loader2 } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { Loader2Icon } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+"use client";
+import React, { useState } from "react";
+import { Search, Loader2 } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Loader2Icon } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 // Define the type for the API response
 interface AlternativeResult {
@@ -15,30 +15,29 @@ interface AlternativeResult {
   "Substitute Score": number;
 }
 
-const ProductAlternativeFinder = () => {
-  const [query, setQuery] = useState('');
+const ProductAlternativeFinder: React.FC = () => {
+  const [query, setQuery] = useState("");
   const [result, setResult] = useState<AlternativeResult | null>(null); // Specify type for result
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleLogout = async () =>{
+  const handleLogout = async () => {
     setLoading(true);
     try {
-      await fetch('api/users/logout',{
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
+      await fetch("/api/users/logout", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
       });
-      router.push('/login');
-      
-    } catch (error:any) {
-      alert('Error'+ error)
-    }
-    finally{
+      router.push("/login");
+    } catch (error: unknown) {
+      console.error("Logout error:", error);
+      alert("Error: " + (error instanceof Error ? error.message : "Unknown error"));
+    } finally {
       setLoading(false);
     }
-  }
+  };
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,26 +48,25 @@ const ProductAlternativeFinder = () => {
     setResult(null);
 
     try {
-      // Replace with your API endpoint
-      const response = await fetch(`https://my-flask-app-brown.vercel.app/recommend?material=${encodeURIComponent(query)}`,{
-        mode:'cors',
-      });
-      
+      const response = await fetch(
+        `https://my-flask-app-brown.vercel.app/recommend?material=${encodeURIComponent(query)}`,
+        { mode: "cors" }
+      );
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP error! Status: ${response.status}`);
       }
-      
+
       const data: AlternativeResult = await response.json();
 
-      // Check if all required fields are present
-      if (data && data.Material && data["Original Score"] !== undefined && data.Substitute && data["Substitute Score"] !== undefined) {
-        setResult(data); // Store the single object in state
+      if (data?.Material && data["Original Score"] !== undefined && data.Substitute && data["Substitute Score"] !== undefined) {
+        setResult(data);
       } else {
         setError("Unexpected response format from the server.");
       }
-    } catch (err) {
-      setError('Failed to fetch alternatives. Please try again later.');
-      console.error('Error fetching alternatives:', err);
+    } catch (err: unknown) {
+      setError("Failed to fetch alternatives. Please try again later.");
+      console.error("Error fetching alternatives:", err);
     } finally {
       setIsLoading(false);
     }
@@ -101,7 +99,7 @@ const ProductAlternativeFinder = () => {
                 ) : (
                   <Search className="w-5 h-5" />
                 )}
-                {isLoading ? 'Searching...' : 'Search'}
+                {isLoading ? "Searching..." : "Search"}
               </button>
             </form>
           </CardContent>
@@ -140,15 +138,11 @@ const ProductAlternativeFinder = () => {
             <CardContent className="p-4 text-center text-gray-600">
               No alternatives found. Try searching for a different product.
             </CardContent>
-            <CardContent className='flex flex-col items-center'>
-            <Button
-            disabled={loading}
-            className="font-semibold my-2"
-            onClick={handleLogout}
-            >
-            {loading && <Loader2Icon className="animate-spin mr-2" />}
-            {loading ? 'Logging Out...' : 'Logout'}
-            </Button>
+            <CardContent className="flex flex-col items-center">
+              <Button disabled={loading} className="font-semibold my-2" onClick={handleLogout}>
+                {loading && <Loader2Icon className="animate-spin mr-2" />}
+                {loading ? "Logging Out..." : "Logout"}
+              </Button>
             </CardContent>
           </Card>
         )}

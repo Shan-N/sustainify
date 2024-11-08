@@ -1,58 +1,66 @@
 "use client";
-import React, { useState } from "react";
+
+import React, { useState, type ChangeEvent } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Inter } from "next/font/google";
+import { Loader2Icon } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Inter } from "next/font/google";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { Loader2Icon } from "lucide-react";
 
 const interFont = Inter({
-  subsets: ['latin'],
-  weight: '400',
+  subsets: ["latin"],
+  weight: "400",
 });
+
+interface UserCredentials {
+  email: string;
+  password: string;
+}
 
 export default function LoginForm() {
   const router = useRouter();
-  const [user, setUser] = useState({
+  const [user, setUser] = useState<UserCredentials>({
     email: "",
-    password: ""
+    password: "",
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null); // State to manage error message
-  const [successMessage, setSuccessMessage] = useState<string | null>(null); // State to manage success message
 
-  const handleChange = (e: any) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setUser({ ...user, [name]: value });
+    setUser((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const onLogin = async () => {
     if (!user.email || !user.password) {
-      setError("Please fill in all fields");
+      alert("Please fill in all fields");
       return;
     }
 
     setLoading(true);
+
     try {
-      const resData = await fetch('/api/users/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/users/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(user),
       });
 
-      const result = await resData.json();
+      const result = await response.json();
 
-      if (!resData.ok) {
+      if (!response.ok) {
         throw new Error(result.message || "Something went wrong");
       }
 
-      console.log("Login successful:", result);
       alert("Login successful");
-      router.push('/dashboard');
-    } catch (error: any) {
-        alert(`There was an error | ${error.message}`);
+      router.push("/dashboard");
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      alert(`There was an error | ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -60,15 +68,15 @@ export default function LoginForm() {
 
   return (
     <div className={`${interFont.className} min-h-screen bg-[#050B26] flex flex-col`}>
-      <div className="flex bg-[#26300E]">
-        <main className={`${interFont.className} flex`}>
-          <h2 className='text-white font-extrabold text-2xl md:text-3xl px-4 py-3'>
-            <Link href='/'>SUSTAINIFY</Link>
+      <header className="flex bg-[#26300E]">
+        <nav className={`${interFont.className} flex`}>
+          <h2 className="text-white font-extrabold text-2xl md:text-3xl px-4 py-3">
+            <Link href="/">SUSTAINIFY</Link>
           </h2>
-        </main>
-      </div>
+        </nav>
+      </header>
 
-      <div className="flex flex-col justify-center pt-60 px-10 md:px-28 md:pt-48">
+      <main className="flex flex-col justify-center pt-60 px-10 md:px-28 md:pt-48">
         <Card className={`${interFont.className} flex flex-col justify-center items-center bg-[#EDFAE8] rounded-lg`}>
           <CardHeader className="font-extrabold text-xl">
             Welcome to Sustainify
@@ -77,7 +85,7 @@ export default function LoginForm() {
             <Input
               className="border-[#182710] my-3 md:mx-32 text-black"
               placeholder="Email"
-              type="text"
+              type="email"
               name="email"
               value={user.email}
               onChange={handleChange}
@@ -95,15 +103,15 @@ export default function LoginForm() {
               onClick={onLogin}
               disabled={loading}
             >
-                {loading ? <Loader2Icon className="animate-spin mr-2" />: null}
-              {loading ? 'Logging in...' : 'Login'}
+              {loading && <Loader2Icon className="animate-spin mr-2" />}
+              {loading ? "Logging in..." : "Login"}
             </Button>
-            <span><Link href='/signup'>
-            Create Account!
-            </Link></span>
+            <Link href="/signup" className="mt-2">
+              Create Account!
+            </Link>
           </CardContent>
         </Card>
-      </div>
+      </main>
     </div>
   );
 }
