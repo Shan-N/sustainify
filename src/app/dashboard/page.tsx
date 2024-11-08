@@ -3,6 +3,9 @@ import React, { useState } from 'react';
 import { Search, Loader2 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Loader2Icon } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 // Define the type for the API response
 interface AlternativeResult {
@@ -17,6 +20,25 @@ const ProductAlternativeFinder = () => {
   const [result, setResult] = useState<AlternativeResult | null>(null); // Specify type for result
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const handleLogout = async () =>{
+    setLoading(true);
+    try {
+      await fetch('api/users/logout',{
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      router.push('/login');
+      
+    } catch (error:any) {
+      alert('Error'+ error)
+    }
+    finally{
+      setLoading(false);
+    }
+  }
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,6 +139,16 @@ const ProductAlternativeFinder = () => {
           <Card>
             <CardContent className="p-4 text-center text-gray-600">
               No alternatives found. Try searching for a different product.
+            </CardContent>
+            <CardContent className='flex flex-col items-center'>
+            <Button
+            disabled={loading}
+            className="font-semibold my-2"
+            onClick={handleLogout}
+            >
+            {loading && <Loader2Icon className="animate-spin mr-2" />}
+            {loading ? 'Logging Out...' : 'Logout'}
+            </Button>
             </CardContent>
           </Card>
         )}
