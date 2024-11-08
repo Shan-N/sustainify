@@ -10,17 +10,16 @@ import { useRouter } from "next/navigation";
 // Define the type for the API response
 interface AlternativeResult {
   Material: string;
-  "Original Score": number;
-  Substitute: string;
-  "Substitute Score": number;
+  "EISc (original)": number;
+  "Recommended Substitute": string;
 }
 
 const ProductAlternativeFinder: React.FC = () => {
   const [query, setQuery] = useState("");
-  const [result, setResult] = useState<AlternativeResult | null>(null); // Specify type for result
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [eisscore, setEisscore] = useState("");
+  const [result, setResult] = useState<AlternativeResult | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -43,13 +42,13 @@ const ProductAlternativeFinder: React.FC = () => {
     e.preventDefault();
     if (!query.trim()) return;
 
-    setIsLoading(true);
+    setLoading(true);
     setError("");
     setResult(null);
 
     try {
       const response = await fetch(
-        `https://fastapi-ml-wmnt.onrender.com/recommend?material=${encodeURIComponent(query)}`,
+        `https://fastapi-model-xjo5.onrender.com/recommend?material=${encodeURIComponent(query)}&eis_score=${encodeURIComponent(eisscore)}`,
         { mode: "cors" }
       );
 
@@ -59,7 +58,7 @@ const ProductAlternativeFinder: React.FC = () => {
 
       const data: AlternativeResult = await response.json();
 
-      if (data?.Material && data["Original Score"] !== undefined && data.Substitute && data["Substitute Score"] !== undefined) {
+      if (data?.Material && data["EISc (original)"] !== undefined && data["Recommended Substitute"]) {
         setResult(data);
       } else {
         setError("Unexpected response format from the server.");
@@ -68,7 +67,7 @@ const ProductAlternativeFinder: React.FC = () => {
       setError("Failed to fetch alternatives. Please try again later.");
       console.error("Error fetching alternatives:", err);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -81,26 +80,40 @@ const ProductAlternativeFinder: React.FC = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSearch} className="flex gap-4">
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Enter a product name to find alternatives"
-                className="flex-1 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                disabled={isLoading}
-              />
-              <button
-                type="submit"
-                className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={isLoading || !query.trim()}
-              >
-                {isLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <Search className="w-5 h-5" />
-                )}
-                {isLoading ? "Searching..." : "Search"}
-              </button>
+              <div className="flex-1">
+                <input
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Enter a product name to find alternatives"
+                  className="p-3 w-full border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={loading}
+                />
+              </div>
+              <div className="flex-1">
+                <input
+                  type="text"
+                  value={eisscore}
+                  onChange={(e) => setEisscore(e.target.value)}
+                  placeholder="Enter EIS score"
+                  className="p-3 w-full border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={loading}
+                />
+              </div>
+              <div className="flex items-center justify-center">
+                <button
+                  type="submit"
+                  className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={loading || !query.trim()}
+                >
+                  {loading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <Search className="w-5 h-5" />
+                  )}
+                  {loading ? "Searching..." : "Search"}
+                </button>
+              </div>
             </form>
           </CardContent>
         </Card>
@@ -111,7 +124,7 @@ const ProductAlternativeFinder: React.FC = () => {
           </Alert>
         )}
 
-        {isLoading && (
+        {loading && (
           <Card>
             <CardContent className="p-8 flex justify-center items-center">
               <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
@@ -119,15 +132,14 @@ const ProductAlternativeFinder: React.FC = () => {
           </Card>
         )}
 
-        {!isLoading && result && (
+        {!loading && result && (
           <Card className="hover:shadow-lg transition-shadow mb-4">
             <CardContent className="p-4">
               <div>
                 <h3 className="text-lg font-semibold">Original Material: {result.Material}</h3>
-                <p className="text-gray-600">Original Score (Lower is Better): {result["Original Score"]}</p>
+                <p className="text-gray-600">Original EISc (Lower is Better): {result["EISc (original)"]}</p>
                 <h4 className="text-lg mt-2 font-semibold">Suggested Substitute:</h4>
-                <p className="text-gray-600">{result.Substitute}</p>
-                <p className="text-gray-600">Substitute Score (Lower is Better): {result["Substitute Score"]}</p>
+                <p className="text-gray-600">{result["Recommended Substitute"]}</p>
               </div>
             </CardContent>
             <CardContent className="flex flex-col items-center">
@@ -139,7 +151,7 @@ const ProductAlternativeFinder: React.FC = () => {
           </Card>
         )}
 
-        {!isLoading && query && !result && !error && (
+        {!loading && query && !result && !error && (
           <Card>
             <CardContent className="p-4 text-center text-gray-600">
               No alternatives found. Try searching for a different product.
