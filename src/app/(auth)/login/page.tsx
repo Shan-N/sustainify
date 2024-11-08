@@ -50,7 +50,7 @@ export default function LoginForm() {
 
       console.log("Login successful:", result);
       alert("Login successful");
-      router.push('/');
+      router.push('/dashboard');
     } catch (error: any) {
         alert(`There was an error | ${error.message}`);
     } finally {
@@ -98,6 +98,9 @@ export default function LoginForm() {
                 {loading ? <Loader2Icon className="animate-spin mr-2" />: null}
               {loading ? 'Logging in...' : 'Login'}
             </Button>
+            <span><Link href='/signup'>
+            Create Account!
+            </Link></span>
           </CardContent>
         </Card>
       </div>
