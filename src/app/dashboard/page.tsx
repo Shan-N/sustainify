@@ -130,6 +130,12 @@ const ProductAlternativeFinder: React.FC = () => {
                 <p className="text-gray-600">Substitute Score (Lower is Better): {result["Substitute Score"]}</p>
               </div>
             </CardContent>
+            <CardContent className="flex flex-col items-center">
+              <Button disabled={loading} className="font-semibold my-2" onClick={handleLogout}>
+                {loading && <Loader2Icon className="animate-spin mr-2" />}
+                {loading ? "Logging Out..." : "Logout"}
+              </Button>
+            </CardContent>
           </Card>
         )}
 

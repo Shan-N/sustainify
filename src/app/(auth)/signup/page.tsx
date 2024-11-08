@@ -107,6 +107,9 @@ export default function SignupForm() {
               {loading && <Loader2Icon className="animate-spin mr-2" />}
               {loading ? "Signing up..." : "Create Account"}
             </Button>
+            <Link href="/login" className="mt-2 flex justify-center items-center">
+              Back to login!
+            </Link>
           </CardContent>
         </Card>
       </div>
