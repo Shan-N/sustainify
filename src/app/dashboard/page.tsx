@@ -16,7 +16,7 @@ interface AlternativeResult {
 
 const ProductAlternativeFinder: React.FC = () => {
   const [query, setQuery] = useState("");
-  const [eisscore, setEisscore] = useState("");
+  // const [eisscore, setEisscore] = useState("");
   const [result, setResult] = useState<AlternativeResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -48,7 +48,7 @@ const ProductAlternativeFinder: React.FC = () => {
 
     try {
       const response = await fetch(
-        `https://fastapi-model-xjo5.onrender.com/recommend?material=${encodeURIComponent(query)}&eis_score=${encodeURIComponent(eisscore)}`,
+        `https://fastapi-model-xjo5.onrender.com/recommend?material=${encodeURIComponent(query)}`,
         { mode: "cors" }
       );
 
@@ -86,16 +86,6 @@ const ProductAlternativeFinder: React.FC = () => {
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Enter a product name to find alternatives"
-                  className="p-3 w-full border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  disabled={loading}
-                />
-              </div>
-              <div className="flex-1">
-                <input
-                  type="text"
-                  value={eisscore}
-                  onChange={(e) => setEisscore(e.target.value)}
-                  placeholder="Enter EIS score"
                   className="p-3 w-full border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   disabled={loading}
                 />
